@@ -1,0 +1,58 @@
+# Server 配置
+server:
+  port: 8080
+  servlet:
+    context-path: /im
+    session:
+      timeout: PT1H
+
+# Spring 配置
+spring:
+  profiles:
+    active: dev
+  application:
+    name: im-server
+  banner:
+    location: classpath:banner.txt
+  main:
+    banner-mode: log
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 50MB
+      max-file-size: 5MB
+  mvc:
+    path-match:
+      matching-strategy: ANT_PATH_MATCHER
+
+# Mybatis plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:priv/cqq/im/**/mapper/*Mapper.xml
+  typeAliasesPackage: priv.cqq.im.entity,priv.cqq.im.dto
+  global-config:
+    datacenterId: 1
+    worker-id: 2
+    banner: false
+  # Mybatis 配置
+  configuration:
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+    # 关闭二级缓存(将scope指定为statement级别, 而非session)
+    local-cache-scope: statement
+    #配置打印执行的sql语句
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    map-underscore-to-camel-case: true
+
+# WebSocket server
+websocket-server:
+  port: 9501
+  # 8192Bytes = 8KB
+  aggregator-max-content-length: 8192
+
+# Swagger 配置
+swagger:
+  enable: true
+  title: XAdmin Api
+  version: 1.0
+  description: XAdmin Api

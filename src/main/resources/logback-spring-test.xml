@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="true" scanPeriod="1 seconds">
+
+    <!-- Level: FATAL 0  ERROR 3  WARN 4  INFO 6  DEBUG 7 -->
+
+    <!-- 0. 初始化配置 -->
+    <contextName>logback-spring</contextName>
+    <property name="PROJECT_NAME" value="im-server"/>
+    <property name="LOG_HOME" value="./applogs/im-server/"/>
+    <!-- Spring 配置 -->
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+    <springProperty scope="context" name="springProfile" source="spring.profiles.active"/>
+    <!-- 定义日志输出格式 -->
+    <property name="FILE_PATTERN"
+              value="%yellow([${springProfile:-}]) %magenta([%X{TraceId}]) %magenta(%d{yyyy-MM-dd HH:mm:ss.SSS}) %yellow(%-5level) %magenta(${PID:-}) %-20(%yellow([%20.20thread])) %cyan([%-40logger{40}:%L]) -> %msg%n"/>
+
+    <!-- 1. Appender 配置 -->
+    <!-- 1) INFO appender : 打印 info 级别及以上的日志到指定文件 -->
+    <appender name="LOG_2_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${PROJECT_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/${PROJECT_NAME}_%d{yyyy-MM-dd}_%i.zip</fileNamePattern>
+            <maxFileSize>300MB</maxFileSize>
+            <maxHistory>5</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <append>true</append>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${FILE_PATTERN}</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 2. 根节点配置: 只将 INFO 级别及以上的输出内容交给引用的 appender (如果 appender 中配置的 filter 不处理 INFO 级别的内容，也可能导致无法打印输出内容) -->
+    <root level="info">
+        <appender-ref ref="LOG_2_FILE"/>
+    </root>
+
+    <!-- 3. 特定 logger 配置 -->
+    <!-- 1) SQL 输出配置 -->
+    <!-- additivity="false" 表示不将打印内容交给 root 节点中的 appender 处理，避免打印内容被多次输出 -->
+    <logger name="priv.cqq.im.mapper" level="debug" additivity="false">
+        <appender-ref ref="LOG_2_FILE"/>
+    </logger>
+</configuration>

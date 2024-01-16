@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="true" scanPeriod="1 seconds">
+
+    <!-- Level: FATAL 0  ERROR 3  WARN 4  INFO 6  DEBUG 7 -->
+
+    <!-- 0. 初始化配置 -->
+    <contextName>logback-spring</contextName>
+    <property name="PROJECT_NAME" value="im-server"/>
+    <property name="LOG_HOME" value="./applogs/im-server/"/>
+    <!-- Spring 配置 -->
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+    <springProperty scope="context" name="springProfile" source="spring.profiles.active"/>
+    <!-- 定义日志输出格式 -->
+    <property name="FILE_PATTERN"
+              value="%yellow([${springProfile:-}]) %magenta([%X{TraceId}]) %magenta(%d{yyyy-MM-dd HH:mm:ss.SSS}) %yellow(%-5level) %magenta(${PID:-}) %-20(%yellow([%20.20thread])) %cyan([%-40logger{40}:%L]) -> %msg%n"/>
+
+    <!-- 1. Appender 配置 -->
+    <!-- 1) Console appender : 输出到控制台 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 2. 根节点配置: 只将 INFO 级别及以上的输出内容交给引用的 appender (如果 appender 中配置的 filter 不处理 INFO 级别的内容，也可能导致无法打印输出内容) -->
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!-- 3. 特定 logger 配置 -->
+    <!-- 1) SQL 输出配置: 开发环境仅输出到控制台 -->
+    <!-- additivity 属性默认为 true，表示将打印内容在 logger 标签中引用的 appender 处理后，再次交给 root 节点中的 appender 处理 -->
+    <logger name="priv.cqq.im.mapper" level="debug"/>
+
+</configuration>
