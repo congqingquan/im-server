@@ -19,10 +19,12 @@ import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
+import priv.cqq.im.netty.config.WebSocketServerConfig;
 import priv.cqq.im.netty.handler.BindInitAttrHandler;
+import priv.cqq.im.netty.handler.ClientIdleListenHandler;
 import priv.cqq.im.netty.handler.QuitHandler;
-import priv.cqq.im.netty.handler.ServerIdleStateHandler;
 import priv.cqq.im.netty.handler.WebSocketServerHandler;
+import priv.cqq.im.service.im.WebSocketService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -37,49 +39,51 @@ import javax.annotation.PreDestroy;
 public class WebSocketServer {
     
     // 前端测试网站：https://wstool.js.org/
-    
-    // 创建线程池执行器
+
     private final EventLoopGroup bossGroup;
     private final EventLoopGroup workerGroup;
-    
     private final Integer port;
-    
-    private final Integer aggregatorMaxContentLength;
-    
-    public WebSocketServer(WebSocketServerConfig serverConfig) {
+    private final WebSocketServerConfig serverConfig;
+    private final WebSocketService webSocketService;
+
+    public WebSocketServer(WebSocketService webSocketService, WebSocketServerConfig serverConfig) {
         Integer bossGroup = ObjectUtils.defaultIfNull(serverConfig.getBossGroup(), 1);
         Integer workGroup = ObjectUtils.defaultIfNull(serverConfig.getWorkGroup(), NettyRuntime.availableProcessors());
         Integer port = ObjectUtils.defaultIfNull(serverConfig.getPort(), 9501);
-        Integer aggregatorMaxContentLength = ObjectUtils.defaultIfNull(serverConfig.getAggregatorMaxContentLength(), 8192);
         this.bossGroup = new NioEventLoopGroup(bossGroup);
         this.workerGroup = new NioEventLoopGroup(workGroup);
         this.port = port;
-        this.aggregatorMaxContentLength = aggregatorMaxContentLength;
+        this.webSocketService = webSocketService;
+        this.serverConfig = serverConfig;
     }
     
     @PostConstruct
     public void start() throws InterruptedException {
         startServer();
     }
-    
-    /**
-     * 销毁
-     */
+
     @PreDestroy
     public void destroy() {
         Future<?> future = bossGroup.shutdownGracefully();
         Future<?> future1 = workerGroup.shutdownGracefully();
         future.syncUninterruptibly();
         future1.syncUninterruptibly();
-        log.info("关闭 ws server 成功");
+        log.info("Shutdown websocket server successfully");
     }
     
     private void startServer() throws InterruptedException {
+
+        Integer aggregatorMaxContentLength = ObjectUtils.defaultIfNull(serverConfig.getAggregatorMaxContentLength(), 8192);
+        Integer receiveTimeoutSeconds = ObjectUtils.defaultIfNull(serverConfig.getReceiveTimeoutSeconds(), 60);
+        Integer sendTimeoutSeconds =  ObjectUtils.defaultIfNull(serverConfig.getSendTimeoutSeconds(), 0);
+        Integer allTimeoutSeconds =  ObjectUtils.defaultIfNull(serverConfig.getAllTimeoutSeconds(), 0);
+
         // Sharable handler
-        WebSocketServerHandler webSocketServerHandler = new WebSocketServerHandler();
+        WebSocketServerHandler webSocketServerHandler = new WebSocketServerHandler(webSocketService);
         QuitHandler quitHandler = new QuitHandler();
-        ServerIdleStateHandler serverIdleStateHandler = new ServerIdleStateHandler();
-        
+        ClientIdleListenHandler clientIdleListenHandler = new ClientIdleListenHandler(receiveTimeoutSeconds, sendTimeoutSeconds, allTimeoutSeconds);
+
+        // Create ServerBootStrap
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
@@ -93,18 +97,22 @@ public class WebSocketServer {
                         pipeline.addLast(new HttpServerCodec());
                         pipeline.addLast(new ChunkedWriteHandler());
                         pipeline.addLast(new HttpObjectAggregator(aggregatorMaxContentLength));
-                        // 属性绑定
+                        // 初始属性绑定
                         pipeline.addLast(new BindInitAttrHandler());
                         pipeline.addLast(new WebSocketServerProtocolHandler("/"));
-                        // WebSocket 消息处理
-                        pipeline.addLast(webSocketServerHandler);
                         // 探活
-                        pipeline.addLast(ServerIdleStateHandler.createNettyServerIdleStateHandler());
-                        pipeline.addLast(serverIdleStateHandler);
+                        pipeline.addLast(clientIdleListenHandler.createNettyIdleStateHandler());
+                        pipeline.addLast(clientIdleListenHandler);
                         // 断连
                         pipeline.addLast(quitHandler);
+                        // WebSocket 消息处理
+                        pipeline.addLast(webSocketServerHandler);
                     }
                 });
         serverBootstrap.bind(port).sync();
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+//        new WebSocketServer(new WebSocketServerConfig()).start();
     }
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="priv.cqq.im.mapper.IMUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="priv.cqq.im.domain.po.IMUser">
+        <id column="user_id" property="userId"/>
+        <result column="id" property="id"/>
+        <result column="open_id" property="openId"/>
+        <result column="nickname" property="nickname"/>
+        <result column="avatar" property="avatar"/>
+        <result column="gender" property="gender"/>
+        <result column="ip_info" property="ipInfo"/>
+        <result column="active_status" property="activeStatus"/>
+        <result column="status" property="status"/>
+        <result column="last_opt_time" property="lastOptTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+    
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, open_id, nickname, avatar, gender, ip_info, active_status, status, last_opt_time, create_time, update_time, deleted
+    </sql>
+
+
+</mapper>

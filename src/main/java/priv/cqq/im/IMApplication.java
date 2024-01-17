@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @MapperScan(basePackages = "priv.cqq.im.**.dao")
 @EnableTransactionManagement
 @SpringBootApplication
-public class ImApplication {
-    
+public class IMApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(ImApplication.class, args);
+        SpringApplication.run(IMApplication.class, args);
     }
-    
+
 }

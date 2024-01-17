@@ -6,9 +6,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import org.apache.commons.lang3.StringUtils;
+import priv.cqq.im.netty.constants.NettyConstants;
+import priv.cqq.im.util.NettyUtils;
 
 import java.net.InetSocketAddress;
 
@@ -28,8 +28,8 @@ public class BindInitAttrHandler extends ChannelInboundHandlerAdapter {
             
             // 1. token
             CharSequence token = urlQuery.get("token");
-            Attribute<String> tokenAttr = ctx.channel().attr(AttributeKey.valueOf("token"));
-            tokenAttr.set(token == null ? null : token.toString());
+            String tokenStr = token == null ? null : token.toString();
+            NettyUtils.setAttr(ctx.channel(), NettyConstants.TOKEN, tokenStr);
 
             // 2. ip
             request.setUri(urlBuilder.getPath().toString());
@@ -40,9 +40,9 @@ public class BindInitAttrHandler extends ChannelInboundHandlerAdapter {
                 InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
                 ip = address.getAddress().getHostAddress();
             }
-            Attribute<String> ipAttr = ctx.channel().attr(AttributeKey.valueOf("ip"));
-            ipAttr.set(ip);
+            NettyUtils.setAttr(ctx.channel(), NettyConstants.IP, ip);
 
+            // 3. remove this
             ctx.pipeline().remove(this);
         }
         ctx.fireChannelRead(msg);

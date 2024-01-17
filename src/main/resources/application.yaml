@@ -47,8 +47,27 @@ mybatis-plus:
 # WebSocket server
 websocket-server:
   port: 9501
-  # 8192Bytes = 8KB
+  # unit: byte - 8192Bytes = 8KB
   aggregator-max-content-length: 8192
+  client-idle:
+    receive-timeout-seconds: 1
+    send-timeout-seconds: 1
+    all-timeout-seconds: 1
+
+# 鉴权配置
+auth:
+  # JWS 鉴权配置
+  jws:
+    # 认证请求头名称
+    authHeader: Token
+    # 用户信息在 Payload 中的 Key
+    userPayloadKey: user
+    # 签名算法，可选算法见：io.jsonwebtoken.SignatureAlgorithm
+    signatureAlgorithm: HS256
+    # 签名密匙(HS256算法要求32个字符)
+    secretKey: 7f3eea94ded3440eab2cec58ad80e700
+    # 签名过期时间
+    duration: 604800000
 
 # Swagger 配置
 swagger:

@@ -17,7 +17,7 @@ public class QuitHandler extends ChannelInboundHandlerAdapter {
     // 监听正常退出: ctx.channel().close()
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        log.warn("{} 正常断开连接(掉线)", ctx.channel());
+        log.warn("{} 触发正常断开连接", ctx.channel());
         super.channelInactive(ctx);
     }
 
