@@ -1,8 +1,7 @@
 # Server 配置
 server:
-  port: 8080
+  port: 8000
   servlet:
-    context-path: /im
     session:
       timeout: PT1H
 
@@ -50,9 +49,10 @@ websocket-server:
   # unit: byte - 8192Bytes = 8KB
   aggregator-max-content-length: 8192
   client-idle:
-    receive-timeout-seconds: 1
-    send-timeout-seconds: 1
-    all-timeout-seconds: 1
+    # half hour
+    receive-timeout-seconds: 1800
+    send-timeout-seconds: 0
+    all-timeout-seconds: 0
 
 # 鉴权配置
 auth:
@@ -66,12 +66,12 @@ auth:
     signatureAlgorithm: HS256
     # 签名密匙(HS256算法要求32个字符)
     secretKey: 7f3eea94ded3440eab2cec58ad80e700
-    # 签名过期时间
+    # 签名过期时间 (ms)
     duration: 604800000
 
 # Swagger 配置
 swagger:
   enable: true
-  title: XAdmin Api
+  title: IM Api
   version: 1.0
-  description: XAdmin Api
+  description: IM Api

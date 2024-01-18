@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
+import priv.cqq.im.netty.session.SessionManager;
 
 /**
  * Client channel 断连处理器
@@ -18,6 +19,7 @@ public class QuitHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         log.warn("{} 触发正常断开连接", ctx.channel());
+        SessionManager.offline(ctx.channel());
         super.channelInactive(ctx);
     }
 
@@ -25,6 +27,6 @@ public class QuitHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("{} 发生运行时异常，或异常断开连接", ctx.channel(), cause);
-        ctx.channel().close();
+        SessionManager.offline(ctx.channel());
     }
 }

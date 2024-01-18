@@ -7,6 +7,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import priv.cqq.im.netty.session.SessionManager;
 
 /**
  * Client channel 空闲检测处理器
@@ -35,8 +36,8 @@ public class ClientIdleListenHandler extends ChannelDuplexHandler {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
             if (IdleState.READER_IDLE == event.state()) {
-                log.info("已经 {} 秒没有接收到 Client [{}] 消息，即将踢掉用户", receiveTimeoutSeconds, ctx.channel().id());
-                ctx.channel().close();
+                log.info("已经 {} 秒没有接收到 Client [{}] 消息，即将踢掉用户", receiveTimeoutSeconds, ctx.channel());
+                SessionManager.offline(ctx.channel());
             }
         }
         super.userEventTriggered(ctx, evt);

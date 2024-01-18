@@ -31,6 +31,6 @@
     <!-- 3. 特定 logger 配置 -->
     <!-- 1) SQL 输出配置: 开发环境仅输出到控制台 -->
     <!-- additivity 属性默认为 true，表示将打印内容在 logger 标签中引用的 appender 处理后，再次交给 root 节点中的 appender 处理 -->
-    <logger name="priv.cqq.im.mapper" level="debug"/>
+    <logger name="priv.cqq.im.dao" level="debug"/>
 
 </configuration>

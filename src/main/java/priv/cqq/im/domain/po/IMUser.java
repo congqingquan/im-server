@@ -2,6 +2,7 @@ package priv.cqq.im.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
+@TableName("im_user")
 public class IMUser extends Model<IMUser> {
 
     private static final long serialVersionUID = 1L;
@@ -43,6 +45,13 @@ public class IMUser extends Model<IMUser> {
 
     @ApiModelProperty(value = "微信 openid")
     private String openId;
+
+    @ApiModelProperty(value = "帐号")
+    private String username;
+
+    // TODO 待改成密文存储
+    @ApiModelProperty(value = "密码")
+    private String password;
 
     @ApiModelProperty(value = "昵称")
     private String nickname;

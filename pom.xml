@@ -68,6 +68,13 @@
             <version>4.1.90.Final</version>
         </dependency>
         
+        <!-- open-library -->
+        <dependency>
+            <groupId>org.cqq</groupId>
+            <artifactId>open-library-web</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
         <!-- apache commons -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -90,13 +97,6 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>5.8.18</version>
-        </dependency>
-        
-        <!-- google -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
         </dependency>
         
         <!-- JWT -->

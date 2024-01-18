@@ -1,4 +1,4 @@
-package priv.cqq.im.mapper;
+package priv.cqq.im.dao;
 
 import priv.cqq.im.domain.po.IMUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;

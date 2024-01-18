@@ -10,7 +10,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import priv.cqq.im.domain.dto.IMUserAuthDTO;
+import priv.cqq.im.domain.dto.WSChannelExtDTO;
 import priv.cqq.im.netty.constants.NettyConstants;
 import priv.cqq.im.netty.session.SessionManager;
 import priv.cqq.im.service.im.WebSocketService;
@@ -52,14 +54,19 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<TextWebS
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
             Channel channel = ctx.channel();
-            Long userId = null;
+            IMUserAuthDTO authDTO = new IMUserAuthDTO();
 
+            // 1. 解析 token 并返回内容
             String token = NettyUtils.getAttr(channel, NettyConstants.TOKEN);
             if (StrUtil.isNotBlank(token)) {
-                userId = webSocketService.authentication(ctx.channel(), token).map(IMUserAuthDTO::getUserId).orElse(null);
+                authDTO = webSocketService.authentication(channel, token).orElse(new IMUserAuthDTO());
             }
 
-            SessionManager.online(ctx.channel(), userId);
+            // 2. 加入全局会话
+            WSChannelExtDTO extDTO = new WSChannelExtDTO();
+            extDTO.setChannelId(channel.id().asLongText());
+            BeanUtils.copyProperties(authDTO, extDTO);
+            SessionManager.online(channel, extDTO);
         }
         super.userEventTriggered(ctx, evt);
     }

@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import priv.cqq.im.netty.constants.NettyConstants;
 import priv.cqq.im.util.NettyUtils;
@@ -17,6 +18,7 @@ import java.net.InetSocketAddress;
  *
  * @author CongQingquan
  */
+@Slf4j
 public class BindInitAttrHandler extends ChannelInboundHandlerAdapter {
     
     @Override
@@ -41,6 +43,8 @@ public class BindInitAttrHandler extends ChannelInboundHandlerAdapter {
                 ip = address.getAddress().getHostAddress();
             }
             NettyUtils.setAttr(ctx.channel(), NettyConstants.IP, ip);
+
+            log.info("用户发起 WS 协议连接，ip: [{}], token: [{}]", ip, token);
 
             // 3. remove this
             ctx.pipeline().remove(this);

@@ -95,7 +95,7 @@
     <!-- 3. 特定 logger 配置 -->
     <!-- 1) SQL 输出配置 -->
     <!-- additivity="false" 表示不将打印内容交给 root 节点中的 appender 处理，避免打印内容被多次输出 -->
-    <logger name="priv.cqq.im.mapper" level="debug" additivity="false">
+    <logger name="priv.cqq.im.dao" level="debug" additivity="false">
         <appender-ref ref="SQL_TO_FILE"/>
     </logger>
 </configuration>

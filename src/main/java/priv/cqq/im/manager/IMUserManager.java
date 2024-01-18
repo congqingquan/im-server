@@ -3,7 +3,7 @@ package priv.cqq.im.manager;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import priv.cqq.im.domain.po.IMUser;
-import priv.cqq.im.mapper.IMUserMapper;
+import priv.cqq.im.dao.IMUserMapper;
 
 /**
  * im 用户信息表 Manager

@@ -1,5 +1,6 @@
 package priv.cqq.im;
 
+import org.cqq.openlibrary.core.config.SystemInitialization;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class IMApplication {
 
     public static void main(String[] args) {
+        SystemInitialization.init();
         SpringApplication.run(IMApplication.class, args);
     }
 

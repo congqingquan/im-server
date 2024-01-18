@@ -1,13 +1,9 @@
-# Server 配置
-server:
-  port: 8020
-
 # Spring 配置
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     name: defaultDataSource
-    url: jdbc:mysql://127.0.0.1:3306/local_db?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://127.0.0.1:3306/im?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=Asia/Shanghai
     username: root
     password: root
     druid:
@@ -53,8 +49,8 @@ spring:
         enabled: true
         url-pattern: "/druid/*"
         reset-enable: true
-        login-username: xadmin
-        login-password: xadmin
+        login-username: im
+        login-password: im
 
 # 日志配置
 logging:
