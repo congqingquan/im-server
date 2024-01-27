@@ -27,26 +27,28 @@ CREATE TABLE `im_user`
 
 CREATE TABLE `im_chat_message`
 (
-    `id`             bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
-    `message_id`     bigint(20) UNSIGNED NOT NULL COMMENT '业务主键',
+    `id`                   bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `message_id`           bigint(20) UNSIGNED NOT NULL COMMENT '业务主键',
 
-    `from_user_id`   bigint(20) NOT NULL COMMENT '发送用户主键',
-    `target_type`    int(11) NOT NULL COMMENT '目标对象类型: 1单聊 2群聊',
-    `target_user_id` bigint(20) DEFAULT NULL COMMENT '目标用户主键(type为1时有值)',
-    `chat_group_id`  bigint(20) DEFAULT NULL COMMENT '群聊主键(type为2时有值)',
+    `from_user_id`         bigint(20) NOT NULL COMMENT '发送用户主键',
+    `target_type`          int(11) NOT NULL COMMENT '目标对象类型: 1单聊 2群聊',
+    `target_user_id`       bigint(20) DEFAULT NULL COMMENT '目标用户主键(type为1时有值)',
+    `from_target_user_key` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '发送与目标用户的主键拼接Key(根据user_id排序后通过中横线 - 连接)，用于快速搜索私聊消息(type为1时有值)',
+    `chat_group_id`        bigint(20) DEFAULT NULL COMMENT '群聊主键(type为2时有值)',
 
-    `content`        varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '消息内容',
-    `reply_msg_id`   bigint(20) DEFAULT NULL COMMENT '回复的消息主键',
-    `gap_count`      int(11) DEFAULT NULL COMMENT '与回复的消息间隔多少条',
-    `type`           int(11) DEFAULT 1 COMMENT '消息类型: 1正常文本, 2撤回消息',
-    `create_time`    datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP (3) COMMENT '创建时间',
-    `update_time`    datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP (3) ON UPDATE CURRENT_TIMESTAMP (3) COMMENT '修改时间',
+    `content`              varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '消息内容',
+    `reply_msg_id`         bigint(20) DEFAULT NULL COMMENT '回复的消息主键',
+    `gap_count`            int(11) DEFAULT NULL COMMENT '与回复的消息间隔多少条',
+    `type`                 int(11) DEFAULT 1 COMMENT '消息类型: 1正常文本, 2撤回消息',
+    `create_time`          datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP (3) COMMENT '创建时间',
+    `update_time`          datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP (3) ON UPDATE CURRENT_TIMESTAMP (3) COMMENT '修改时间',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uniq_message_id` (`message_id`) USING BTREE,
-    INDEX            `idx_from_user_id`(`from_user_id`) USING BTREE,
-    INDEX            `idx_target_user_id`(`target_user_id`) USING BTREE,
-    INDEX            `idx_chat_group_id`(`chat_group_id`) USING BTREE,
-    INDEX            `idx_create_time`(`create_time`) USING BTREE
+    INDEX                  `idx_from_user_id`(`from_user_id`) USING BTREE,
+    INDEX                  `idx_target_user_id`(`target_user_id`) USING BTREE,
+    INDEX                  `idx_from_target_user_key`(`from_target_user_key`) USING BTREE,
+    INDEX                  `idx_chat_group_id`(`chat_group_id`) USING BTREE,
+    INDEX                  `idx_create_time`(`create_time`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'IM消息表' ROW_FORMAT = Dynamic;
 
 CREATE TABLE `im_user_contact`
@@ -62,8 +64,6 @@ CREATE TABLE `im_user_contact`
     UNIQUE KEY `uniq_concat_id` (`concat_id`) USING BTREE,
     KEY              `idx_create_time` (`create_time`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='IM用户联系人表';
-
-
 
 CREATE TABLE `im_chat_group`
 (

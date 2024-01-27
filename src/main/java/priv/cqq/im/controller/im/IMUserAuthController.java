@@ -13,10 +13,9 @@ import priv.cqq.im.domain.vo.IMUserLoginVO;
 import priv.cqq.im.service.im.IMAuthService;
 
 /**
- * Created by Kim QQ.Cong on 2022/12/31 / 14:50
+ * 认证鉴权接口
  *
- * @author: CongQingquan
- * @Description: 认证鉴权接口
+ * @author CongQingquan
  */
 @Api(value = "认证鉴权接口", tags = {"模块: 认证鉴权"})
 @RestController
