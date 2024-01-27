@@ -1,6 +1,5 @@
 package priv.cqq.im.domain.dto;
 
-import io.netty.channel.Channel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
