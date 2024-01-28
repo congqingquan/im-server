@@ -1,8 +1,6 @@
 package priv.cqq.im.netty.handler;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSON;
-import cn.hutool.json.JSONUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,10 +8,17 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.cqq.openlibrary.core.util.EnumUtils;
+import org.cqq.openlibrary.core.util.JSONUtils;
+import org.cqq.oplibrary.web.exception.BusinessException;
 import org.springframework.beans.BeanUtils;
 import priv.cqq.im.domain.dto.IMUserAuthDTO;
 import priv.cqq.im.domain.dto.WSChannelExtDTO;
 import priv.cqq.im.netty.constants.NettyConstants;
+import priv.cqq.im.netty.entity.message.Message;
+import priv.cqq.im.netty.entity.message.WSMessage;
+import priv.cqq.im.netty.enums.MessageTypeEnum;
+import priv.cqq.im.netty.handler.message.MessageHandler;
 import priv.cqq.im.netty.session.SessionManager;
 import priv.cqq.im.service.im.WebSocketService;
 import priv.cqq.im.util.NettyUtils;
@@ -75,19 +80,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<TextWebS
     // 读取客户端发送的请求报文
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        JSON parse = JSONUtil.parse(msg.text());
-        log.info(parse.toString());
-//        WSBaseReq wsBaseReq = JSONUtil.toBean(msg.text(), WSBaseReq.class);
-//        WSReqTypeEnum wsReqTypeEnum = WSReqTypeEnum.of(wsBaseReq.getType());
-//        switch (wsReqTypeEnum) {
-//            case LOGIN:
-//                this.webSocketService.handleLoginReq(ctx.channel());
-//                log.info("请求二维码 = " + msg.text());
-//                break;
-//            case HEARTBEAT:
-//                break;
-//            default:
-//                log.info("未知类型");
-//        }
+        WSMessage wsMessage = JSONUtils.parseObject(msg.text(), WSMessage.class);
+        MessageTypeEnum messageTypeEnum =
+                EnumUtils.equalMatch(MessageTypeEnum.values(), MessageTypeEnum::getType, wsMessage.getType()).orElseThrow(() -> new BusinessException("No supported message type"));
+        Message message = JSONUtils.parseObject(msg.text(), messageTypeEnum.getMessageClass());
+        MessageHandler<? extends Message> messageHandler = messageTypeEnum.getSpringHandlerBean();
+        messageHandler.castCallHandleMessage(message);
     }
 }

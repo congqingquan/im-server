@@ -13,14 +13,14 @@ import priv.cqq.im.domain.vo.IMUserLoginVO;
 import priv.cqq.im.service.im.IMAuthService;
 
 /**
- * 认证鉴权接口
+ * C端 认证鉴权接口
  *
  * @author CongQingquan
  */
-@Api(value = "认证鉴权接口", tags = {"模块: 认证鉴权"})
+@Api(value = "C端 认证鉴权接口", tags = {"模块: C端 认证鉴权"})
 @RestController
 @AllArgsConstructor
-public class IMUserAuthController {
+public class CIMUserAuthController {
 
     private final IMAuthService authService;
 
