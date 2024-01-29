@@ -1,0 +1,17 @@
+### Login1
+POST http://localhost:8000/im/c/user/login
+Content-Type: application/json
+
+{
+  "username": "zs",
+  "password": "123"
+}
+
+### Login2
+POST http://localhost:8000/im/c/user/login
+Content-Type: application/json
+
+{
+  "username": "ls",
+  "password": "123"
+}

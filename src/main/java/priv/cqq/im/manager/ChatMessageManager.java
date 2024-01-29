@@ -10,6 +10,9 @@ import priv.cqq.im.domain.dto.CChatMessagePageDTO;
 import priv.cqq.im.domain.po.ChatMessage;
 import priv.cqq.im.domain.vo.CChatMessagePageVO;
 import priv.cqq.im.domain.vo.CChatMessageViewVO;
+import priv.cqq.im.enums.ChatMessageTargetTypeEnum;
+import priv.cqq.im.netty.entity.message.DirectMessage;
+import priv.cqq.im.util.ChatMessageUtils;
 
 /**
  * IM消息表 Manager
@@ -30,5 +33,16 @@ public class ChatMessageManager extends ServiceImpl<ChatMessageMapper, ChatMessa
             return null;
         }
         return BeanUtils.copy(chatMessage, new CChatMessageViewVO());
+    }
+    
+    public void saveDirectMessage(DirectMessage message) {
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setFromUserId(message.getFrom());
+        chatMessage.setTargetType(ChatMessageTargetTypeEnum.USER.getType());
+        chatMessage.setTargetUserId(message.getTarget());
+        chatMessage.setFromTargetUserKey(ChatMessageUtils.genFromTargetUserKey(message.getFrom(), message.getTarget()));
+        chatMessage.setContent(message.getContent());
+        chatMessage.setType(message.getDMSType());
+        save(chatMessage);
     }
 }

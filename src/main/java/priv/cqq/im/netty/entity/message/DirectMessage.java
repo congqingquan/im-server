@@ -10,11 +10,13 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DMSMessage extends Message {
+public class DirectMessage extends Message {
     
     private Long from;
     
     private Long target;
     
     private String content;
+    
+    private Integer DMSType;
 }

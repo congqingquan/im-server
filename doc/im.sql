@@ -31,7 +31,7 @@ CREATE TABLE `im_chat_message`
     `message_id`           bigint(20) UNSIGNED NOT NULL COMMENT '业务主键',
 
     `from_user_id`         bigint(20) NOT NULL COMMENT '发送用户主键',
-    `target_type`          int(11) NOT NULL COMMENT '目标对象类型: 1单聊 2群聊',
+    `target_type`          int(11) NOT NULL COMMENT '目标对象类型: 1用户 2群组',
     `target_user_id`       bigint(20) DEFAULT NULL COMMENT '目标用户主键(type为1时有值)',
     `from_target_user_key` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '发送与目标用户的主键拼接Key(根据user_id排序后通过中横线 - 连接)，用于快速搜索私聊消息(type为1时有值)',
     `chat_group_id`        bigint(20) DEFAULT NULL COMMENT '群聊主键(type为2时有值)',

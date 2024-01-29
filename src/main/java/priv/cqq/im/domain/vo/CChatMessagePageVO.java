@@ -39,7 +39,7 @@ public class CChatMessagePageVO implements Serializable {
     @ApiModelProperty(value = "发送用户主键")
     private Long fromUserId;
 
-    @ApiModelProperty(value = "目标对象类型: 1单聊 2群聊")
+    @ApiModelProperty(value = "目标对象类型: 1用户 2群组")
     private Integer targetType;
 
     @ApiModelProperty(value = "目标用户主键(type为1时有值)")
