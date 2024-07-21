@@ -11,8 +11,6 @@ spring:
     active: dev
   application:
     name: im-server
-  banner:
-    location: classpath:banner.txt
   main:
     banner-mode: log
   servlet:
@@ -26,8 +24,7 @@ spring:
 
 # Mybatis plus 配置
 mybatis-plus:
-  mapper-locations: classpath*:priv/cqq/im/**/mapper/*Mapper.xml
-  typeAliasesPackage: priv.cqq.im.entity,priv.cqq.im.dto
+  mapper-locations: classpath*:priv/cqq/im/**/dao/*Mapper.xml
   global-config:
     datacenterId: 1
     worker-id: 2
@@ -54,7 +51,7 @@ websocket-server:
     send-timeout-seconds: 0
     all-timeout-seconds: 0
 
-# 鉴权配置
+# Auth
 auth:
   # JWS 鉴权配置
   jws:
@@ -66,12 +63,5 @@ auth:
     signatureAlgorithm: HS256
     # 签名密匙(HS256算法要求32个字符)
     secretKey: 7f3eea94ded3440eab2cec58ad80e700
-    # 签名过期时间 (ms)
+    # 有效时长(毫秒)
     duration: 604800000
-
-# Swagger 配置
-swagger:
-  enable: true
-  title: IM Api
-  version: 1.0
-  description: IM Api

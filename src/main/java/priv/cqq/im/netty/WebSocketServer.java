@@ -16,18 +16,26 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.NettyRuntime;
 import io.netty.util.concurrent.Future;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import priv.cqq.im.netty.config.WebSocketServerConfig;
+import priv.cqq.im.netty.entity.message.Message;
+import priv.cqq.im.netty.enums.MessageCategoryEnum;
 import priv.cqq.im.netty.handler.BindInitAttrHandler;
 import priv.cqq.im.netty.handler.ClientIdleListenHandler;
 import priv.cqq.im.netty.handler.QuitHandler;
 import priv.cqq.im.netty.handler.WebSocketServerHandler;
-import priv.cqq.im.service.im.WebSocketService;
+import priv.cqq.im.netty.handler.message.MessageHandler;
+import priv.cqq.im.service.WebSocketService;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 /**
  * WebSocket server
@@ -39,14 +47,15 @@ import javax.annotation.PreDestroy;
 public class WebSocketServer {
     
     // 前端测试网站：https://wstool.js.org/
-
+    
     private final EventLoopGroup bossGroup;
     private final EventLoopGroup workerGroup;
     private final Integer port;
     private final WebSocketServerConfig serverConfig;
     private final WebSocketService webSocketService;
-
-    public WebSocketServer(WebSocketService webSocketService, WebSocketServerConfig serverConfig) {
+    private final Map<MessageCategoryEnum, List<MessageHandler<? extends Message>>> messageHandlerMapping;
+    
+    public WebSocketServer(WebSocketService webSocketService, WebSocketServerConfig serverConfig, List<MessageHandler<? extends Message>> messageHandlers) {
         Integer bossGroup = ObjectUtils.defaultIfNull(serverConfig.getBossGroup(), 1);
         Integer workGroup = ObjectUtils.defaultIfNull(serverConfig.getWorkGroup(), NettyRuntime.availableProcessors());
         Integer port = ObjectUtils.defaultIfNull(serverConfig.getPort(), 9501);
@@ -55,13 +64,16 @@ public class WebSocketServer {
         this.port = port;
         this.webSocketService = webSocketService;
         this.serverConfig = serverConfig;
+        this.messageHandlerMapping = ObjectUtils.defaultIfNull(messageHandlers, new ArrayList<MessageHandler<? extends Message>>())
+                        .stream()
+                        .collect(Collectors.groupingBy(MessageHandler::supportedCategory));
     }
     
     @PostConstruct
     public void start() throws InterruptedException {
         startServer();
     }
-
+    
     @PreDestroy
     public void destroy() {
         Future<?> future = bossGroup.shutdownGracefully();
@@ -72,17 +84,18 @@ public class WebSocketServer {
     }
     
     private void startServer() throws InterruptedException {
-
+        
         Integer aggregatorMaxContentLength = ObjectUtils.defaultIfNull(serverConfig.getAggregatorMaxContentLength(), 8192);
         Integer receiveTimeoutSeconds = ObjectUtils.defaultIfNull(serverConfig.getReceiveTimeoutSeconds(), 60);
-        Integer sendTimeoutSeconds =  ObjectUtils.defaultIfNull(serverConfig.getSendTimeoutSeconds(), 0);
-        Integer allTimeoutSeconds =  ObjectUtils.defaultIfNull(serverConfig.getAllTimeoutSeconds(), 0);
-
+        Integer sendTimeoutSeconds = ObjectUtils.defaultIfNull(serverConfig.getSendTimeoutSeconds(), 0);
+        Integer allTimeoutSeconds = ObjectUtils.defaultIfNull(serverConfig.getAllTimeoutSeconds(), 0);
+        
         // Sharable handler
-        WebSocketServerHandler webSocketServerHandler = new WebSocketServerHandler(webSocketService);
+        
+        WebSocketServerHandler webSocketServerHandler = new WebSocketServerHandler(webSocketService, messageHandlerMapping);
         QuitHandler quitHandler = new QuitHandler();
         ClientIdleListenHandler clientIdleListenHandler = new ClientIdleListenHandler(receiveTimeoutSeconds, sendTimeoutSeconds, allTimeoutSeconds);
-
+        
         // Create ServerBootStrap
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
@@ -99,7 +112,9 @@ public class WebSocketServer {
                         pipeline.addLast(new HttpObjectAggregator(aggregatorMaxContentLength));
                         // 初始属性绑定
                         pipeline.addLast(new BindInitAttrHandler());
-                        pipeline.addLast(new WebSocketServerProtocolHandler("/"));
+                        // WS 协议处理器: 如果不配置 checkStartWith，就需要在前继节中将 request.uri() 重置为 websocketPath 的相等值才会被该 WS 协议处理器处理
+                        //               具体逻辑在源码: io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandshakeHandler#isWebSocketPath
+                        pipeline.addLast(new WebSocketServerProtocolHandler("/", true));
                         // 探活
                         pipeline.addLast(clientIdleListenHandler.createNettyIdleStateHandler());
                         pipeline.addLast(clientIdleListenHandler);
@@ -110,9 +125,5 @@ public class WebSocketServer {
                     }
                 });
         serverBootstrap.bind(port).sync();
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-//        new WebSocketServer(new WebSocketServerConfig()).start();
     }
 }

@@ -15,8 +15,13 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class WSChannelExtDTO {
-
+    
     private String channelId;
 
     private Long userId;
+    
+    /**
+     * @see priv.cqq.im.netty.enums.UserTypeEnum
+     */
+    private String type;
 }

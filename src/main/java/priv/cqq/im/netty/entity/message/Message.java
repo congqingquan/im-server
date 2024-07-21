@@ -1,6 +1,7 @@
 package priv.cqq.im.netty.entity.message;
 
 import lombok.Data;
+import priv.cqq.im.netty.enums.MessageCategoryEnum;
 
 /**
  * Message
@@ -8,7 +9,10 @@ import lombok.Data;
  * @author CongQingquan
  */
 @Data
-public abstract class Message {
-
-    private Integer type;
+public class Message {
+    
+    /**
+     * @see MessageCategoryEnum
+     */
+    private String category;
 }

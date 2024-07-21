@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Session manager
+ * 会话管理
  *
  * @author Qingquan.Cong
  */

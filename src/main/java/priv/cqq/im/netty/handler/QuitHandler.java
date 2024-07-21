@@ -27,7 +27,6 @@ public class QuitHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("{} 发生运行时异常，或异常断开连接", ctx.channel(), cause);
-        // SessionManager.offline(ctx.channel());
         ctx.writeAndFlush(cause.getMessage());
         super.exceptionCaught(ctx, cause);
     }

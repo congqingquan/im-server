@@ -33,8 +33,7 @@ public class ClientIdleListenHandler extends ChannelDuplexHandler {
     // 监听 receiveTimeoutSeconds 内读空闲的 client channel
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof IdleStateEvent) {
-            IdleStateEvent event = (IdleStateEvent) evt;
+        if (evt instanceof IdleStateEvent event) {
             if (IdleState.READER_IDLE == event.state()) {
                 log.info("已经 {} 秒没有接收到 Client [{}] 消息，即将踢掉用户", receiveTimeoutSeconds, ctx.channel());
                 SessionManager.offline(ctx.channel());

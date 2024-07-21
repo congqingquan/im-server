@@ -1,49 +1,59 @@
 package priv.cqq.im.config;
 
-import org.cqq.oplibrary.web.CommonFilter;
+import lombok.AllArgsConstructor;
+import org.cqq.openlibrary.common.filter.CommonFilter;
+import org.cqq.openlibrary.common.util.CollectionUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import priv.cqq.im.component.interceptor.AuthenticationInterceptor;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
- * Web application config
+ * Web 应用程序配置
  *
  * @author Qingquan.Cong
  */
+@AllArgsConstructor
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebApplicationConfig implements WebMvcConfigurer {
 
-    private final List<HandlerInterceptor> handlerInterceptors;
+    private final AuthenticationInterceptor authenticationInterceptor;
 
-    public WebApplicationConfig(List<HandlerInterceptor> handlerInterceptors) {
-        this.handlerInterceptors = handlerInterceptors;
-    }
-
+    public static final String[] SWAGGER_URLS = {
+            "/error", "/swagger-resources/**", "/v3/api-docs/**", "/favicon.ico", "/doc.html", "/webjars/**", "/swagger-ui/**"
+    };
+    
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        for (HandlerInterceptor handlerInterceptor : handlerInterceptors) {
-            registry.addInterceptor(handlerInterceptor)
-                    .addPathPatterns("/**")
-                    .excludePathPatterns(
-                            "/authenticate/**",
-                            "/error", "/swagger-resources/**", "/v3/api-docs", "/favicon.ico", "/doc.html", "/webjars/**",
-                            "/swagger-ui/**"
-                    );
-        }
+        registry.addInterceptor(authenticationInterceptor)
+                .order(1)
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        CollectionUtils.addAll(
+                                CollectionUtils.newArrayList(SWAGGER_URLS), "/im/c/user/login"
+                        )
+                );
     }
-
+    
     @Bean
     public FilterRegistrationBean<CommonFilter> globalFilterFilter() {
+        CommonFilter.CrossOriginConfig crossOriginConfig = new CommonFilter.CrossOriginConfig(
+                request -> request.getHeader("Origin"),
+                true,
+                3600,
+                CommonFilter.CrossOriginConfig.DEFAULT_ALLOW_METHODS,
+                CollectionUtils.addAll(CommonFilter.CrossOriginConfig.DEFAULT_ALLOW_HEADERS, "Token")
+        );
+
         FilterRegistrationBean<CommonFilter> filterBean = new FilterRegistrationBean<>();
-        filterBean.setFilter(new CommonFilter());
+        filterBean.setName("CommonFilter");
+        filterBean.setFilter(new CommonFilter(crossOriginConfig));
         filterBean.setUrlPatterns(Collections.singletonList("/*"));
         return filterBean;
     }
