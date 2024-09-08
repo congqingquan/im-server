@@ -6,7 +6,14 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
- * Group message entity
+ * DMS test message entity
+ *
+ * {
+ *   "category": "DMS_TEST",
+ *   "fromUserId": 1,
+ *   "targetUserId": 2,
+ *   "content": "Hello Cqq2"
+ * }
  *
  * @author CongQingquan
  */
@@ -14,14 +21,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupMessage extends Message {
-    
-    private Long chatGroupId;
+public class DMSTestMessage extends Message {
     
     private String content;
-    
-    /**
-     * @see priv.cqq.im.netty.enums.MessageTypeEnum
-     */
-    private String type;
 }

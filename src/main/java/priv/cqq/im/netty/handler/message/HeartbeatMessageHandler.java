@@ -7,6 +7,7 @@ import priv.cqq.im.manager.IMChatGroupMemberManager;
 import priv.cqq.im.manager.IMChatMessageManager;
 import priv.cqq.im.netty.entity.message.HeartbeatMessage;
 import priv.cqq.im.netty.enums.MessageCategoryEnum;
+import priv.cqq.im.util.RedisPublisher;
 
 /**
  * Heartbeat message handler
@@ -16,8 +17,11 @@ import priv.cqq.im.netty.enums.MessageCategoryEnum;
 @Component
 public class HeartbeatMessageHandler extends MessageHandler<HeartbeatMessage> {
     
-    public HeartbeatMessageHandler(IMChatMessageManager chatMessageManager, IMChatGroupManager chatGroupManager, IMChatGroupMemberManager chatGroupMemberManager) {
-        super(chatMessageManager, chatGroupManager, chatGroupMemberManager);
+    public HeartbeatMessageHandler(IMChatMessageManager chatMessageManager,
+                                 IMChatGroupManager chatGroupManager,
+                                 IMChatGroupMemberManager chatGroupMemberManager,
+                                 RedisPublisher redisPublisher) {
+        super(chatMessageManager, chatGroupManager, chatGroupMemberManager, redisPublisher);
     }
     
     @Override

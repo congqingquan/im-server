@@ -11,6 +11,15 @@ import priv.cqq.im.netty.enums.MessageCategoryEnum;
 @Data
 public class Message {
     
+    private Long fromUserId;
+    
+    private Long targetUserId;
+    
+    /**
+     * 消费标记: 用于处理接受某次请求后，使用 targetId
+     */
+    private boolean consumed;
+    
     /**
      * @see MessageCategoryEnum
      */

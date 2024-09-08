@@ -22,19 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import priv.cqq.im.netty.config.WebSocketServerConfig;
-import priv.cqq.im.netty.entity.message.Message;
-import priv.cqq.im.netty.enums.MessageCategoryEnum;
 import priv.cqq.im.netty.handler.BindInitAttrHandler;
 import priv.cqq.im.netty.handler.ClientIdleListenHandler;
 import priv.cqq.im.netty.handler.QuitHandler;
 import priv.cqq.im.netty.handler.WebSocketServerHandler;
-import priv.cqq.im.netty.handler.message.MessageHandler;
+import priv.cqq.im.netty.handler.message.MessageHandlerManager;
 import priv.cqq.im.service.WebSocketService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import priv.cqq.im.util.RedisPublisher;
 
 
 /**
@@ -53,9 +47,10 @@ public class WebSocketServer {
     private final Integer port;
     private final WebSocketServerConfig serverConfig;
     private final WebSocketService webSocketService;
-    private final Map<MessageCategoryEnum, List<MessageHandler<? extends Message>>> messageHandlerMapping;
+    private final MessageHandlerManager messageHandlerManager;
+    private final RedisPublisher redisPublisher;
     
-    public WebSocketServer(WebSocketService webSocketService, WebSocketServerConfig serverConfig, List<MessageHandler<? extends Message>> messageHandlers) {
+    public WebSocketServer(WebSocketService webSocketService, WebSocketServerConfig serverConfig, MessageHandlerManager messageHandlerManager, RedisPublisher redisPublisher) {
         Integer bossGroup = ObjectUtils.defaultIfNull(serverConfig.getBossGroup(), 1);
         Integer workGroup = ObjectUtils.defaultIfNull(serverConfig.getWorkGroup(), NettyRuntime.availableProcessors());
         Integer port = ObjectUtils.defaultIfNull(serverConfig.getPort(), 9501);
@@ -64,9 +59,8 @@ public class WebSocketServer {
         this.port = port;
         this.webSocketService = webSocketService;
         this.serverConfig = serverConfig;
-        this.messageHandlerMapping = ObjectUtils.defaultIfNull(messageHandlers, new ArrayList<MessageHandler<? extends Message>>())
-                        .stream()
-                        .collect(Collectors.groupingBy(MessageHandler::supportedCategory));
+        this.messageHandlerManager = messageHandlerManager;
+        this.redisPublisher = redisPublisher;
     }
     
     @PostConstruct
@@ -92,7 +86,7 @@ public class WebSocketServer {
         
         // Sharable handler
         
-        WebSocketServerHandler webSocketServerHandler = new WebSocketServerHandler(webSocketService, messageHandlerMapping);
+        WebSocketServerHandler webSocketServerHandler = new WebSocketServerHandler(webSocketService, messageHandlerManager, redisPublisher);
         QuitHandler quitHandler = new QuitHandler();
         ClientIdleListenHandler clientIdleListenHandler = new ClientIdleListenHandler(receiveTimeoutSeconds, sendTimeoutSeconds, allTimeoutSeconds);
         

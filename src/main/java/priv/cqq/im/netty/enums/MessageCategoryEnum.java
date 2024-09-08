@@ -12,6 +12,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum MessageCategoryEnum {
     
+    DMS_TEST,
     GROUP,
     HEARTBEAT
 }

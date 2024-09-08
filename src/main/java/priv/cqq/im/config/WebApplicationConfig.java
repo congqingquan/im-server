@@ -43,17 +43,9 @@ public class WebApplicationConfig implements WebMvcConfigurer {
     
     @Bean
     public FilterRegistrationBean<CommonFilter> globalFilterFilter() {
-        CommonFilter.CrossOriginConfig crossOriginConfig = new CommonFilter.CrossOriginConfig(
-                request -> request.getHeader("Origin"),
-                true,
-                3600,
-                CommonFilter.CrossOriginConfig.DEFAULT_ALLOW_METHODS,
-                CollectionUtils.addAll(CommonFilter.CrossOriginConfig.DEFAULT_ALLOW_HEADERS, "Token")
-        );
-
         FilterRegistrationBean<CommonFilter> filterBean = new FilterRegistrationBean<>();
         filterBean.setName("CommonFilter");
-        filterBean.setFilter(new CommonFilter(crossOriginConfig));
+        filterBean.setFilter(new CommonFilter());
         filterBean.setUrlPatterns(Collections.singletonList("/*"));
         return filterBean;
     }

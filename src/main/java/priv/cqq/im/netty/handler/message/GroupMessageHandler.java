@@ -13,6 +13,7 @@ import priv.cqq.im.netty.entity.message.GroupMessage;
 import priv.cqq.im.netty.enums.MessageCategoryEnum;
 import priv.cqq.im.netty.session.SessionManager;
 import priv.cqq.im.util.NettyUtils;
+import priv.cqq.im.util.RedisPublisher;
 
 import java.util.List;
 
@@ -24,8 +25,11 @@ import java.util.List;
 @Component
 public class GroupMessageHandler extends MessageHandler<GroupMessage> {
     
-    public GroupMessageHandler(IMChatMessageManager chatMessageManager, IMChatGroupManager chatGroupManager, IMChatGroupMemberManager chatGroupMemberManager) {
-        super(chatMessageManager, chatGroupManager, chatGroupMemberManager);
+    public GroupMessageHandler(IMChatMessageManager chatMessageManager,
+                                   IMChatGroupManager chatGroupManager,
+                                   IMChatGroupMemberManager chatGroupMemberManager,
+                                   RedisPublisher redisPublisher) {
+        super(chatMessageManager, chatGroupManager, chatGroupMemberManager, redisPublisher);
     }
     
     @Override

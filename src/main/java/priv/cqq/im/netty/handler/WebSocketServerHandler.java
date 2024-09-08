@@ -8,8 +8,6 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cqq.openlibrary.common.exception.BusinessException;
-import org.cqq.openlibrary.common.util.EnumUtils;
 import org.cqq.openlibrary.common.util.JSONUtils;
 import org.cqq.openlibrary.common.util.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -17,15 +15,12 @@ import priv.cqq.im.domain.dto.IMUserAuthDTO;
 import priv.cqq.im.domain.dto.WSChannelExtDTO;
 import priv.cqq.im.netty.constants.NettyConstants;
 import priv.cqq.im.netty.entity.message.Message;
-import priv.cqq.im.netty.enums.MessageCategoryEnum;
 import priv.cqq.im.netty.enums.UserTypeEnum;
-import priv.cqq.im.netty.handler.message.MessageHandler;
+import priv.cqq.im.netty.handler.message.MessageHandlerManager;
 import priv.cqq.im.netty.session.SessionManager;
 import priv.cqq.im.service.WebSocketService;
 import priv.cqq.im.util.NettyUtils;
-
-import java.util.List;
-import java.util.Map;
+import priv.cqq.im.util.RedisPublisher;
 
 /**
  * WebSocket 消息处理器
@@ -39,7 +34,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<TextWebS
     
     private final WebSocketService webSocketService;
     
-    private final Map<MessageCategoryEnum, List<MessageHandler<? extends Message>>> messageHandlerMapping;
+    private final MessageHandlerManager messageHandlerManager;
+    
+    private final RedisPublisher redisPublisher;
     
     // 当每个客户端连接后，触发该方法，即使 WebSocketServerHandler 是 Sharable 的
     // Gets called after the ChannelHandler was added to the actual context and it's ready to handle events.
@@ -86,19 +83,26 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<TextWebS
         super.userEventTriggered(ctx, evt);
     }
     
-    // 统一处理C端发送的消息
+    /**
+     * 统一处理 C 端发送的消息:
+     *
+     * 1. 如果当前服务节点存在 target channel 则直接使用，否则广播其他服务节点
+     * 2. MessageHandler 在推送消息时同理，先检查本地是否存在 target channel 否则广播其他服务节点 (priv.cqq.im.netty.handler.message.MessageHandler#publishMessage(java.lang.Long, java.lang.String))
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        // 1. 获取消息类型
-        Message message = JSONUtils.parseObject(msg.text(), Message.class);
-        MessageCategoryEnum messageCategoryEnum =
-                EnumUtils.equalMatch(MessageCategoryEnum.values(), MessageCategoryEnum::name, message.getCategory())
-                        .orElseThrow(() -> new BusinessException("No supported message type"));
-        // 2. 根据消息类型获取对应的消息实体，并读取完整的消息体
-        List<MessageHandler<? extends Message>> messageHandlers = messageHandlerMapping.get(messageCategoryEnum);
-        for (MessageHandler<? extends Message> messageHandler : messageHandlers) {
-            Message fullMessage = JSONUtils.parseObject(msg.text(), messageHandler.supportedMessageClass());
-            messageHandler.handleMessage(ctx.channel(), fullMessage);
+        String originMessage = msg.text();
+        Message message = JSONUtils.parseObject(originMessage, Message.class);
+        Channel targetUserChannel = SessionManager.get(message.getTargetUserId());
+        if (targetUserChannel == null) {
+            log.info("目标用户 [{}] 未链接到当前节点，将消息广播推送到其他 Server 节点", message.getTargetUserId());
+            redisPublisher.publish(NettyConstants.DISTRIBUTED_IM_MESSAGE_TOPIC, originMessage);
+            return;
         }
+        // if targetUserChannel != null > targetUserChannel == ctx.channel()
+        messageHandlerManager.handleMessage(targetUserChannel, (msg.text()));
     }
 }
+
+// 如何能不广播到自己？这样就不需要判断 channel 是否存在本地服务了。
+// > session 统一管理。

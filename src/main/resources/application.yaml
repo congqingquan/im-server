@@ -42,7 +42,7 @@ mybatis-plus:
 
 # WebSocket server
 websocket-server:
-  port: 9501
+  port: 8501
   # unit: byte - 8192Bytes = 8KB
   aggregator-max-content-length: 8192
   client-idle:
